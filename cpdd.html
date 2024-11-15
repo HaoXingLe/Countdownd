@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #fff;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease;
+        }
+
+        h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 182, 193, 1);
+            color: white;
+        }
+
+        #timer {
+            font-size: 3em;
+            font-weight: bold;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+
+        .highlight {
+            color: #ff69b4;
+            text-shadow: 2px 2px 4px rgba(255, 20, 147, 0.8), 0 0 15px rgba(255, 105, 180, 1);
+        }
+
+        /* 粒子效果 */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 105, 180, 0.7);
+            opacity: 0;
+            pointer-events: none;
+            animation: particleMove 3s infinite ease-in-out;
+        }
+
+        @keyframes particleMove {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(100px, -100px) scale(1.5);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(-100px, 100px) scale(1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(255, 182, 193, 0.5);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 8px 20px rgba(255, 105, 180, 0.8);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(255, 182, 193, 0.5);
+            }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateText {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="status">状态更新中...</h1>
+    <div id="timer"></div>
+
+    <div class="particle" style="width: 15px; height: 15px; animation-delay: 0s; top: 20%; left: 25%"></div>
+    <div class="particle" style="width: 20px; height: 20px; animation-delay: 1s; top: 30%; left: 50%"></div>
+    <div class="particle" style="width: 10px; height: 10px; animation-delay: 2s; top: 40%; left: 75%"></div>
+
+    <script>
+        function getNextWorkTimes() {
+            const now = new Date();
+            const day = now.getDay();
+
+            const workStartHour = 9;
+            const workEndHour = (day === 2 || day === 4) ? 20 : 18;
+            const workEndMinute = (day === 2 || day === 4) ? 30 : 0;
+
+            const lunchStartHour = 11;
+            const lunchStartMinute = 30;
+            const lunchEndHour = 13;
+
+            const workStartTime = new Date(now);
+            workStartTime.setHours(workStartHour, 0, 0, 0);
+
+            const workEndTime = new Date(now);
+            workEndTime.setHours(workEndHour, workEndMinute, 0, 0);
+
+            const lunchStartTime = new Date(now);
+            lunchStartTime.setHours(lunchStartHour, lunchStartMinute, 0, 0);
+
+            const lunchEndTime = new Date(now);
+            lunchEndTime.setHours(lunchEndHour, 0, 0);
+
+            return { workStartTime, workEndTime, lunchStartTime, lunchEndTime };
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const { workStartTime, workEndTime, lunchStartTime, lunchEndTime } = getNextWorkTimes();
+            const day = now.getDay();
+
+            let statusMessage = "";
+            let timerContent = "";
+            let backgroundUrl = "";
+
+            if (day === 0 || day === 6) {
+                // 休息时间（周末或下班后）
+                backgroundUrl = "  https://img1.baidu.com/it/u=631154048,1754250772&fm=253&fmt=auto&app=138&f=JPEG?w=888&h=500"; // 休息背景图
+                statusMessage = "已经下班啦好好休息！";
+                timerContent = `当前时间：<span class="highlight">${now.toLocaleTimeString()}</span>`;
+            } else if (now >= lunchStartTime && now < lunchEndTime) {
+                // 午餐时间
+                backgroundUrl = "https://img2.baidu.com/it/u=3937701376,1657642412&fm=253&fmt=auto&app=120&f=JPEG?w=1920&h=1080"; // 午餐背景图
+                statusMessage = "现在是吃饭午休时间！";
+                timerContent = `当前时间：<span class="highlight">${now.toLocaleTimeString()}</span>`;
+            } else if (now < workStartTime || now >= workEndTime) {
+                // 下班后或上班前
+                backgroundUrl = "https://i0.hdslb.com/bfs/archive/14924e5dc0db0e45cc589154b94f7e50ae748d57.jpg"; // 工作外时间背景图
+                statusMessage = "已经下班啦好好休息！";
+                timerContent = `当前时间：<span class="highlight">${now.toLocaleTimeString()}</span>`;
+            } else {
+                // 上班时间，倒计时
+                const diff = workEndTime - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                backgroundUrl = "https://img0.baidu.com/it/u=2163044998,3676917668&fm=253&fmt=auto&app=138&f=JPEG?w=640&h=481"; // 上班时间背景图
+                statusMessage = "今天下班倒计时：";
+                timerContent = `
+                    <span class="highlight">${hours}</span> 小时 
+                    <span class="highlight">${minutes}</span> 分钟 
+                    <span class="highlight">${seconds}</span> 秒
+                `;
+            }
+
+            document.body.style.backgroundImage = `url(${backgroundUrl})`;
+            document.getElementById('status').innerText = statusMessage;
+            document.getElementById('timer').innerHTML = timerContent;
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    </script>
+</body>
+</html>
